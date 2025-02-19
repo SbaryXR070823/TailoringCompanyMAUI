@@ -24,17 +24,18 @@ public class FirebaseAuthService : IAuthService
     {
         _settings = settings.Value;
 
-        // Initialize Firebase Admin SDK if not already initialized
-        if (FirebaseApp.DefaultInstance == null)
-        {
-            FirebaseApp.Create(new AppOptions()
-            {
-                Credential = GoogleCredential.FromFile("path-to-your-service-account.json"),
-                ProjectId = _settings.ProjectId
-            });
-        }
+        // Convert the service account key to a JSON string
+        var serviceAccountKeyJson = System.Text.Json.JsonSerializer.Serialize(_settings.ServiceAccountKey);
 
-        _auth = FirebaseAuth.DefaultInstance;
+        // Load the credential from the JSON string
+        var credential = GoogleCredential.FromJson(serviceAccountKeyJson);
+
+        // Initialize FirebaseApp
+        FirebaseApp.Create(new AppOptions
+        {
+            Credential = credential,
+            ProjectId = _settings.ProjectId
+        });
     }
 
     public async Task<UserInfo> LoginAsync(string email, string password)

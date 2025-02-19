@@ -15,4 +15,5 @@ public class FirebaseSettings
     public string MessagingSenderId { get; set; }
     public string AppId { get; set; }
     public string MeasurementId { get; set; }
+    public ServiceAccountKey ServiceAccountKey { get; set; }
 }
