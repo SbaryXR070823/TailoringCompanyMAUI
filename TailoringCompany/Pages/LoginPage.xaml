@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:TailoringCompany.ViewModels"
+             x:Class="TailoringCompany.Pages.LoginPage"
+             BackgroundColor="Black">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior Command="{Binding BackCommand}" />
+    </Shell.BackButtonBehavior>
+    <Grid RowDefinitions="*, Auto"
+          Padding="20">
+        <VerticalStackLayout Grid.Row="0"
+                            VerticalOptions="Center"
+                            Spacing="20">
+            <Label Text="Welcome Back"
+                   TextColor="White"
+                   FontSize="34"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <VerticalStackLayout Spacing="5">
+                <Entry Placeholder="Email"
+                       Text="{Binding Email, UpdateSourceEventName=TextChanged}"
+                       TextColor="White"
+                       PlaceholderColor="Gray"
+                       BackgroundColor="Transparent"
+                       ClearButtonVisibility="WhileEditing" />
+                <Label Text="{Binding EmailError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding HasEmailError}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Entry Placeholder="Password"
+                       Text="{Binding Password, UpdateSourceEventName=TextChanged}"
+                       IsPassword="True"
+                       TextColor="White"
+                       PlaceholderColor="Gray"
+                       BackgroundColor="Transparent"
+                       ClearButtonVisibility="WhileEditing" />
+                <Label Text="{Binding PasswordError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding HasPasswordError}" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1"
+                            Spacing="15"
+                            Margin="0,0,0,30">
+            <Button Text="Login"
+                Command="{Binding LoginCommand}"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontSize="16"
+                HeightRequest="50"
+                CornerRadius="25"
+                IsEnabled="{Binding LoginCommand.CanExecute, Mode=OneWay}" />
+
+            <Label Text="Forgot Password?"
+                   TextColor="White"
+                   FontSize="14"
+                   HorizontalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

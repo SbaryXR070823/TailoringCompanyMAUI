@@ -5,9 +5,6 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Options;
 using Shared.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Authentication.Services;
@@ -24,29 +21,31 @@ public class FirebaseAuthService : IAuthService
     {
         _settings = settings.Value;
 
-        // Convert the service account key to a JSON string
         var serviceAccountKeyJson = System.Text.Json.JsonSerializer.Serialize(_settings.ServiceAccountKey);
 
-        // Load the credential from the JSON string
         var credential = GoogleCredential.FromJson(serviceAccountKeyJson);
 
-        // Initialize FirebaseApp
-        FirebaseApp.Create(new AppOptions
+        if (FirebaseApp.DefaultInstance == null)
         {
-            Credential = credential,
-            ProjectId = _settings.ProjectId
-        });
+            FirebaseApp.Create(new AppOptions
+            {
+                Credential = credential,
+                ProjectId = _settings.ProjectId
+            });
+        }
+
+        _auth = FirebaseAuth.DefaultInstance;
+        if (_auth == null)
+        {
+            throw new InvalidOperationException("FirebaseAuth.DefaultInstance is null after initialization.");
+        }
     }
 
     public async Task<UserInfo> LoginAsync(string email, string password)
     {
         try
         {
-            // Use Firebase Admin SDK to verify the user
             var userRecord = await _auth.GetUserByEmailAsync(email);
-
-            // In a real implementation, you would validate the password
-            // For now, we're just checking if the user exists
 
             var userInfo = new UserInfo
             {

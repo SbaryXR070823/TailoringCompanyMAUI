@@ -7,5 +7,7 @@ using System.Threading.Tasks;
 namespace TailoringCompany.Services;
 public interface INavigationService
 {
-    Task NavigateToAsync(string pageName);
+    public Task NavigateToAsync(string pageName);
+    public Task NavigateToAsync(string route, IDictionary<string, object> parameters = null);
+    public Task GoBackAsync();
 }

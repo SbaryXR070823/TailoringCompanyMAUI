@@ -3,6 +3,7 @@ using Authentication.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared.Models;
+using TailoringCompany.Helpers;
 using TailoringCompany.Services;
 using TailoringCompany.ViewModels;
 
@@ -41,8 +42,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAuthService, FirebaseAuthService>();
         builder.Services.AddSingleton<INavigationService, NavigationService>();
 
-        builder.Services.AddTransient<MainPage>();
-        builder.Services.AddTransient<MainViewModel>();
+        builder.Services.RegisterPagesAndViewModels();
 
 #if DEBUG
         builder.Logging.AddDebug();

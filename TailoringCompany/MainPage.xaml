@@ -5,9 +5,8 @@
              x:Class="TailoringCompany.MainPage"
              xmlns:local="clr-namespace:TailoringCompany"
              BackgroundColor="Black">
-    
+
     <Grid RowDefinitions="*, Auto">
-        <!-- Main Content -->
         <VerticalStackLayout Grid.Row="0"
                             VerticalOptions="Center"
                             Spacing="20">
@@ -18,7 +17,6 @@
                    HorizontalOptions="Center" />
         </VerticalStackLayout>
 
-        <!-- Bottom Buttons -->
         <VerticalStackLayout Grid.Row="1"
                             Spacing="15"
                             Margin="20,0,20,30">
