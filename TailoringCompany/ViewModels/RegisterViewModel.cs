@@ -1,25 +1,35 @@
 ﻿using Authentication.IServices;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using TailoringCompany.Services;
 using System.Collections;
+using Shared.Models;
 
 namespace TailoringCompany.ViewModels;
 
-public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
+public class RegisterViewModel : BaseViewModel, INotifyDataErrorInfo
 {
     private readonly IAuthService _authService;
     private readonly INavigationService _navigationService;
 
     private string _email;
     private string _password;
+    private string _confirmPassword;
+    private string _displayName;
     private readonly Dictionary<string, List<string>> _errors = new();
+
     public string EmailError => _errors.ContainsKey(nameof(Email)) ? string.Join("\n", _errors[nameof(Email)]) : string.Empty;
     public bool HasEmailError => _errors.ContainsKey(nameof(Email));
 
     public string PasswordError => _errors.ContainsKey(nameof(Password)) ? string.Join("\n", _errors[nameof(Password)]) : string.Empty;
     public bool HasPasswordError => _errors.ContainsKey(nameof(Password));
+
+    public string ConfirmPasswordError => _errors.ContainsKey(nameof(ConfirmPassword)) ? string.Join("\n", _errors[nameof(ConfirmPassword)]) : string.Empty;
+    public bool HasConfirmPasswordError => _errors.ContainsKey(nameof(ConfirmPassword));
+
+    public string DisplayNameError => _errors.ContainsKey(nameof(DisplayName)) ? string.Join("\n", _errors[nameof(DisplayName)]) : string.Empty;
+    public bool HasDisplayNameError => _errors.ContainsKey(nameof(DisplayName));
+
     public string Email
     {
         get => _email;
@@ -40,34 +50,61 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
             if (SetProperty(ref _password, value))
             {
                 ValidatePassword(value);
+                ValidateConfirmPassword(_confirmPassword); // Revalidate confirm password when password changes
             }
         }
     }
 
-    public ICommand LoginCommand { get; }
-    public ICommand ForgotPasswordCommand { get; }
-    public ICommand ClearEmailCommand { get; }
+    public string ConfirmPassword
+    {
+        get => _confirmPassword;
+        set
+        {
+            if (SetProperty(ref _confirmPassword, value))
+            {
+                ValidateConfirmPassword(value);
+            }
+        }
+    }
+
+    public string DisplayName
+    {
+        get => _displayName;
+        set
+        {
+            if (SetProperty(ref _displayName, value))
+            {
+                ValidateDisplayName(value);
+            }
+        }
+    }
+
     public ICommand RegisterCommand { get; }
+    public ICommand LoginInsteadCommand { get; }
+    public ICommand ClearEmailCommand { get; }
     public ICommand ClearPasswordCommand { get; }
+    public ICommand ClearConfirmPasswordCommand { get; }
+    public ICommand ClearDisplayNameCommand { get; }
     public ICommand BackCommand { get; }
 
     public bool HasErrors => _errors.Any();
 
     public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-    public LoginViewModel(IAuthService authService, INavigationService navigationService)
+    public RegisterViewModel(IAuthService authService, INavigationService navigationService)
     {
         _authService = authService;
         _navigationService = navigationService;
 
-        LoginCommand = new Command(async () => await ExecuteLoginCommand(),
-            () => CanExecuteLogin());
-        RegisterCommand = new Command(async () => await NavigateToRegister());
-        ForgotPasswordCommand = new Command(async () => await ExecuteForgotPasswordCommand());
+        RegisterCommand = new Command(async () => await ExecuteRegisterCommand(),
+            () => CanExecuteRegister());
+        LoginInsteadCommand = new Command(async () => await NavigateToLogin());
         ClearEmailCommand = new Command(() => Email = string.Empty);
         ClearPasswordCommand = new Command(() => Password = string.Empty);
+        ClearConfirmPasswordCommand = new Command(() => ConfirmPassword = string.Empty);
+        ClearDisplayNameCommand = new Command(() => DisplayName = string.Empty);
         BackCommand = new Command(async () => await GoBack());
-        PropertyChanged += (_, __) => ((Command)LoginCommand).ChangeCanExecute();
+        PropertyChanged += (_, __) => ((Command)RegisterCommand).ChangeCanExecute();
     }
 
     private async Task GoBack()
@@ -75,9 +112,9 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         await _navigationService.NavigateToAsync("///MainPage");
     }
 
-    private async Task NavigateToRegister()
+    private async Task NavigateToLogin()
     {
-        await _navigationService.NavigateToAsync("RegisterPage");
+        await _navigationService.NavigateToAsync("LoginPage");
     }
 
     private void ValidateEmail(string email)
@@ -99,7 +136,7 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         }
         else
         {
-            _errors.Remove(nameof(Email)); 
+            _errors.Remove(nameof(Email));
         }
 
         RaiseErrorsChanged(nameof(Email));
@@ -130,6 +167,55 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         RaiseErrorsChanged(nameof(Password));
     }
 
+    private void ValidateConfirmPassword(string confirmPassword)
+    {
+        var errorList = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            errorList.Add("Please confirm your password.");
+        }
+        else if (confirmPassword != Password)
+        {
+            errorList.Add("Passwords do not match.");
+        }
+
+        if (errorList.Count > 0)
+        {
+            _errors[nameof(ConfirmPassword)] = errorList;
+        }
+        else
+        {
+            _errors.Remove(nameof(ConfirmPassword));
+        }
+
+        RaiseErrorsChanged(nameof(ConfirmPassword));
+    }
+
+    private void ValidateDisplayName(string displayName)
+    {
+        var errorList = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            errorList.Add("Display name is required.");
+        }
+        else if (displayName.Length < 3)
+        {
+            errorList.Add("Display name must be at least 3 characters long.");
+        }
+
+        if (errorList.Count > 0)
+        {
+            _errors[nameof(DisplayName)] = errorList;
+        }
+        else
+        {
+            _errors.Remove(nameof(DisplayName));
+        }
+
+        RaiseErrorsChanged(nameof(DisplayName));
+    }
 
     private bool IsValidEmail(string email)
     {
@@ -144,10 +230,12 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         }
     }
 
-    private async Task ExecuteLoginCommand()
+    private async Task ExecuteRegisterCommand()
     {
+        ValidateDisplayName(DisplayName);
         ValidateEmail(Email);
         ValidatePassword(Password);
+        ValidateConfirmPassword(ConfirmPassword);
 
         if (HasErrors)
         {
@@ -157,13 +245,18 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         try
         {
             IsBusy = true;
-            var user = await _authService.LoginAsync(Email, Password);
+
+            var userInfo = await _authService.RegisterAsync(Email, Password, DisplayName);
+
+            await Application.Current.MainPage.DisplayAlert("Success",
+                "Registration successful! You are now logged in.", "OK");
+
             await _navigationService.NavigateToAsync("HomePage");
         }
         catch (Exception ex)
         {
             await Application.Current.MainPage.DisplayAlert("Error",
-                $"Login failed: {ex.Message}", "OK");
+                $"Registration failed: {ex.Message}", "OK");
         }
         finally
         {
@@ -171,16 +264,12 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         }
     }
 
-    private async Task ExecuteForgotPasswordCommand()
-    {
-        await Application.Current.MainPage.DisplayAlert("Info",
-            "Forgot password feature coming soon!", "OK");
-    }
-
-    private bool CanExecuteLogin()
+    private bool CanExecuteRegister()
     {
         return !string.IsNullOrWhiteSpace(Email) &&
                !string.IsNullOrWhiteSpace(Password) &&
+               !string.IsNullOrWhiteSpace(ConfirmPassword) &&
+               !string.IsNullOrWhiteSpace(DisplayName) &&
                !IsBusy &&
                !HasErrors;
     }
@@ -200,6 +289,10 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         OnPropertyChanged(nameof(HasEmailError));
         OnPropertyChanged(nameof(PasswordError));
         OnPropertyChanged(nameof(HasPasswordError));
-        ((Command)LoginCommand).ChangeCanExecute();
+        OnPropertyChanged(nameof(ConfirmPasswordError));
+        OnPropertyChanged(nameof(HasConfirmPasswordError));
+        OnPropertyChanged(nameof(DisplayNameError));
+        OnPropertyChanged(nameof(HasDisplayNameError));
+        ((Command)RegisterCommand).ChangeCanExecute();
     }
 }
