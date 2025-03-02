@@ -13,4 +13,9 @@ namespace Shared.Models
         public string Role { get; set; } = string.Empty;
         public string UserId { get; set; }
     }
+
+    public class UserRoleResponse
+    {
+        public string Role { get; set; }
+    }
 }

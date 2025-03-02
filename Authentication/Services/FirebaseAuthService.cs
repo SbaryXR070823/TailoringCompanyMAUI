@@ -46,14 +46,12 @@ public class FirebaseAuthService : IAuthService
         try
         {
             var userRecord = await _auth.GetUserByEmailAsync(email);
-
             var userInfo = new UserInfo
             {
                 Email = userRecord.Email,
                 Name = userRecord.DisplayName,
                 UserId = userRecord.Uid
             };
-
             _currentUser = userInfo;
             AuthStateChanged?.Invoke(this, userInfo);
 

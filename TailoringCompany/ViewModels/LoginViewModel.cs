@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using TailoringCompany.Services;
 using System.Collections;
+using BackendServices.IServices;
 
 namespace TailoringCompany.ViewModels;
 
@@ -11,6 +12,7 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
 {
     private readonly IAuthService _authService;
     private readonly INavigationService _navigationService;
+    private readonly IUserService _userService;
 
     private string _email;
     private string _password;
@@ -55,10 +57,11 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
 
     public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-    public LoginViewModel(IAuthService authService, INavigationService navigationService)
+    public LoginViewModel(IAuthService authService, INavigationService navigationService, IUserService userService)
     {
         _authService = authService;
         _navigationService = navigationService;
+        _userService = userService;
 
         LoginCommand = new Command(async () => await ExecuteLoginCommand(),
             () => CanExecuteLogin());
@@ -158,6 +161,7 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
         {
             IsBusy = true;
             var user = await _authService.LoginAsync(Email, Password);
+            var role = await _userService.GetUserRoleAsync(Email);
             await _navigationService.NavigateToAsync("HomePage");
         }
         catch (Exception ex)

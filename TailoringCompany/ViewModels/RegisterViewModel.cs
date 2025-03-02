@@ -4,6 +4,8 @@ using System.Windows.Input;
 using TailoringCompany.Services;
 using System.Collections;
 using Shared.Models;
+using BackendServices.IServices;
+using Shared.Enums;
 
 namespace TailoringCompany.ViewModels;
 
@@ -11,6 +13,7 @@ public class RegisterViewModel : BaseViewModel, INotifyDataErrorInfo
 {
     private readonly IAuthService _authService;
     private readonly INavigationService _navigationService;
+    private readonly IUserService _userService;
 
     private string _email;
     private string _password;
@@ -50,7 +53,7 @@ public class RegisterViewModel : BaseViewModel, INotifyDataErrorInfo
             if (SetProperty(ref _password, value))
             {
                 ValidatePassword(value);
-                ValidateConfirmPassword(_confirmPassword); // Revalidate confirm password when password changes
+                ValidateConfirmPassword(_confirmPassword); 
             }
         }
     }
@@ -91,10 +94,11 @@ public class RegisterViewModel : BaseViewModel, INotifyDataErrorInfo
 
     public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-    public RegisterViewModel(IAuthService authService, INavigationService navigationService)
+    public RegisterViewModel(IAuthService authService, INavigationService navigationService, IUserService userService)
     {
         _authService = authService;
         _navigationService = navigationService;
+        _userService = userService;
 
         RegisterCommand = new Command(async () => await ExecuteRegisterCommand(),
             () => CanExecuteRegister());
@@ -250,7 +254,7 @@ public class RegisterViewModel : BaseViewModel, INotifyDataErrorInfo
 
             await Application.Current.MainPage.DisplayAlert("Success",
                 "Registration successful! You are now logged in.", "OK");
-
+            await _userService.AssignRoleAsync(Email, nameof(UserRolesEnum.User));
             await _navigationService.NavigateToAsync("HomePage");
         }
         catch (Exception ex)

@@ -60,6 +60,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="Platforms\Android\Resources\xml\network_security_config.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="firebase-config.json" />
 	</ItemGroup>
 
@@ -85,6 +89,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Authentication\Authentication.csproj" />
+	  <ProjectReference Include="..\BackendServices\BackendServices.csproj" />
 	  <ProjectReference Include="..\Models\Shared.csproj" />
 	</ItemGroup>
 
