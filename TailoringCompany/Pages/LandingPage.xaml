@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:TailoringCompany.Helpers"
+             xmlns:vm="clr-namespace:TailoringCompany.ViewModels"
+             x:Class="TailoringCompany.Pages.LandingPage">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StatusColorConverter x:Key="StatusColorConverter" />
+            <converters:Base64ToImageConverter x:Key="Base64ToImageConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Padding="20" Spacing="10">
+
+        <Label Text="Alina's Fashion - Premium Tailoring Workshop"
+               FontSize="24"
+               FontAttributes="Bold"
+               HorizontalOptions="Center" />
+
+        <Button Text="Create Order"
+                HorizontalOptions="Center" />
+
+        <CarouselView ItemsSource="{Binding Orders}" HeightRequest="250">
+            <CarouselView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="10" Margin="5" CornerRadius="10" BackgroundColor="White">
+                        <VerticalStackLayout>
+                            <Image Source="{Binding ImageReference, Converter={StaticResource Base64ToImageConverter}}"
+                                   HeightRequest="100" WidthRequest="100"
+                                   Aspect="AspectFill" />
+                            <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" />
+                            <Label Text="{Binding Description}" FontSize="14" />
+                            <Label Text="Pickup Time: {Binding PickupTime}" FontSize="14" />
+
+                            <Frame Padding="5" CornerRadius="10" BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
+                                <Label Text="{Binding Status}" TextColor="White" HorizontalOptions="Center" />
+                            </Frame>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+    </VerticalStackLayout>
+</ContentPage>

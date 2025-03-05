@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:TailoringCompany.ViewModels"
              x:Class="TailoringCompany.Pages.LoginPage"
              BackgroundColor="Black"
-             Title="Lgin Page">
+             Title="Login Page">
 
     <Shell.BackButtonBehavior>
         <BackButtonBehavior Command="{Binding BackCommand}" />

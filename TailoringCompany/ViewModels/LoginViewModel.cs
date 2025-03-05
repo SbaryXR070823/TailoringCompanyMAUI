@@ -5,6 +5,8 @@ using System.Windows.Input;
 using TailoringCompany.Services;
 using System.Collections;
 using BackendServices.IServices;
+using Shared.Enums;
+using Shared.Models;
 
 namespace TailoringCompany.ViewModels;
 
@@ -162,7 +164,11 @@ public class LoginViewModel : BaseViewModel, INotifyDataErrorInfo
             IsBusy = true;
             var user = await _authService.LoginAsync(Email, Password);
             var role = await _userService.GetUserRoleAsync(Email);
-            await _navigationService.NavigateToAsync("HomePage");
+            Preferences.Set("UserEmail", user.Email);
+            Preferences.Set("UserName", user.Name);
+            Preferences.Set("UserRole", role);
+            Preferences.Set("UserId", user.UserId);
+            await _navigationService.NavigateToAsync("LandingPage");
         }
         catch (Exception ex)
         {

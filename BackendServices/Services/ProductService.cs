@@ -1,4 +1,5 @@
 ﻿using BackendServices.IServices;
+using Microsoft.Maui.Devices;
 using Shared.BackendModels;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,16 @@ namespace BackendServices.Services
         public ProductsService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                _apiUrl = "http://10.0.2.2:8000";
+            }
+            else
+            {
+                _apiUrl = $"{Shared.Constants.BackendUrl}";
+            }
+
+            Console.WriteLine($"API URL set to: {_apiUrl}");
         }
 
         public async Task<List<ProductInterface>> GetProductsAsync()

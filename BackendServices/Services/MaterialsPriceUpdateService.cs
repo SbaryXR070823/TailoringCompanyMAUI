@@ -1,4 +1,5 @@
 ﻿using BackendServices.IServices;
+using Microsoft.Maui.Devices;
 using Microsoft.VisualBasic;
 using Shared.BackendModels;
 using System;
@@ -18,6 +19,16 @@ namespace BackendServices.Services
         public MaterialsPriceUpdateService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                _apiUrl = "http://10.0.2.2:8000";
+            }
+            else
+            {
+                _apiUrl = $"{Shared.Constants.BackendUrl}";
+            }
+
+            Console.WriteLine($"API URL set to: {_apiUrl}");
         }
 
         public async Task<List<MaterialsHistoryInterface>> GetMaterialsPriceUpdatesAsync()

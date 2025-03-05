@@ -255,6 +255,10 @@ public class RegisterViewModel : BaseViewModel, INotifyDataErrorInfo
             await Application.Current.MainPage.DisplayAlert("Success",
                 "Registration successful! You are now logged in.", "OK");
             await _userService.AssignRoleAsync(Email, nameof(UserRolesEnum.User));
+            Preferences.Set("UserEmail", userInfo.Email);
+            Preferences.Set("UserName", userInfo.Name);
+            Preferences.Set("UserRole", nameof(UserRolesEnum.User));
+            Preferences.Set("UserId", userInfo.UserId);
             await _navigationService.NavigateToAsync("HomePage");
         }
         catch (Exception ex)
