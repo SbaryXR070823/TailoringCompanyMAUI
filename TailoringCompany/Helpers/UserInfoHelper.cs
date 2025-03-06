@@ -21,4 +21,13 @@ public class UserInfoHelper
 
         return userInfo;
     }
+
+    public static void RemoveUserInfoFromPreferences()
+    {
+        Preferences.Remove("UserEmail");
+        Preferences.Remove("UserName");
+        Preferences.Remove("UserRole");
+        Preferences.Remove("UserId");
+
+    }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TailoringCompany.Helpers;
 using TailoringCompany.Services;
 
 namespace TailoringCompany.ViewModels
@@ -21,7 +22,11 @@ namespace TailoringCompany.ViewModels
         {
             _authService = authService;
             _navigationService = navigationService;
-
+            var user = UserInfoHelper.GetUserInfoFromPreferences();
+            if (!string.IsNullOrEmpty(user.UserId))
+            {
+                _navigationService.NavigateToAsync("LandingPage");
+            }
             LoginCommand = new Command(async () => await OnLoginClicked());
             RegisterCommand = new Command(async () => await OnRegisterClicked());
         }

@@ -8,14 +8,14 @@ namespace Shared.BackendModels;
 
 public class OrderInterface
 {
-    public string? Id { get; set; }
+    public string? _id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public string? ProductId { get; set; }
-    public string? ImageReference { get; set; }
-    public string? FinalImage { get; set; }
+    public string? Product_Id { get; set; }
+    public string? Image_Reference { get; set; }
+    public string? Final_Image { get; set; }
     public string Status { get; set; }
-    public string PickupTime { get; set; }
+    public string Pickup_Time { get; set; }
     public string UserEmail { get; set; }
-    public string? FinishedOrderTime { get; set; }
+    public string? Finished_Order_Time { get; set; }
 }

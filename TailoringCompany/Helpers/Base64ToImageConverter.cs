@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using System.IO;
+using Microsoft.Maui.Controls;
 
 namespace TailoringCompany.Helpers;
 
@@ -10,7 +12,8 @@ public class Base64ToImageConverter : IValueConverter
         {
             try
             {
-                byte[] imageBytes = System.Convert.FromBase64String(base64String);
+                var base64Data = base64String.Contains(",") ? base64String.Split(',')[1] : base64String;
+                byte[] imageBytes = System.Convert.FromBase64String(base64Data);
                 return ImageSource.FromStream(() => new MemoryStream(imageBytes));
             }
             catch

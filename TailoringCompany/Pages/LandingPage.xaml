@@ -9,11 +9,18 @@
         <ResourceDictionary>
             <converters:StatusColorConverter x:Key="StatusColorConverter" />
             <converters:Base64ToImageConverter x:Key="Base64ToImageConverter" />
+            <converters:DateTimeConverter x:Key="DateTimeConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <VerticalStackLayout Padding="20" Spacing="10">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Logout" 
+                     Order="Primary" 
+                     Priority="0" 
+                     Clicked="OnLogoutClicked" />
+    </ContentPage.ToolbarItems>
 
+    <VerticalStackLayout Padding="20" Spacing="10">
         <Label Text="Alina's Fashion - Premium Tailoring Workshop"
                FontSize="24"
                FontAttributes="Bold"
@@ -22,19 +29,28 @@
         <Button Text="Create Order"
                 HorizontalOptions="Center" />
 
-        <CarouselView ItemsSource="{Binding Orders}" HeightRequest="250">
+        <CarouselView ItemsSource="{Binding Orders}" HeightRequest="500">
             <CarouselView.ItemTemplate>
                 <DataTemplate>
                     <Frame Padding="10" Margin="5" CornerRadius="10" BackgroundColor="White">
                         <VerticalStackLayout>
-                            <Image Source="{Binding ImageReference, Converter={StaticResource Base64ToImageConverter}}"
-                                   HeightRequest="100" WidthRequest="100"
+                            <Image Source="{Binding Image_Reference, Converter={StaticResource Base64ToImageConverter}}"
+                                   HeightRequest="150" WidthRequest="150"
                                    Aspect="AspectFill" />
-                            <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" />
-                            <Label Text="{Binding Description}" FontSize="14" />
-                            <Label Text="Pickup Time: {Binding PickupTime}" FontSize="14" />
 
-                            <Frame Padding="5" CornerRadius="10" BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
+                            <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" />
+
+                            <Label Text="{Binding Description}" MaxLines="2" LineBreakMode="TailTruncation" FontSize="14" />
+
+                            <Button Text="Read More" FontSize="12" Padding="5"
+                                    Command="{Binding ShowDescriptionCommand}"
+                                    CommandParameter="{Binding Description}" />
+
+                            <Label Text="{Binding Pickup_Time, Converter={StaticResource DateTimeConverter}, StringFormat='Pickup Time: {0}'}"
+                                   FontSize="14" />
+
+                            <Frame Padding="5" CornerRadius="10"
+                                   BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
                                 <Label Text="{Binding Status}" TextColor="White" HorizontalOptions="Center" />
                             </Frame>
                         </VerticalStackLayout>
