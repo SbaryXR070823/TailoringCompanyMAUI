@@ -5,6 +5,7 @@ using BackendServices.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared.Models;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using TailoringCompany.Helpers;
 using TailoringCompany.Services;
 using TailoringCompany.ViewModels;
@@ -18,6 +19,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

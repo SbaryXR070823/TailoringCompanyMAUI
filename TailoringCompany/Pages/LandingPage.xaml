@@ -3,60 +3,236 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:TailoringCompany.Helpers"
              xmlns:vm="clr-namespace:TailoringCompany.ViewModels"
-             x:Class="TailoringCompany.Pages.LandingPage">
-
+             x:Class="TailoringCompany.Pages.LandingPage"
+             BackgroundColor="{AppThemeBinding Light=#F8F9FA, Dark=#212529}">
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:StatusColorConverter x:Key="StatusColorConverter" />
             <converters:Base64ToImageConverter x:Key="Base64ToImageConverter" />
             <converters:DateTimeConverter x:Key="DateTimeConverter" />
+
+            <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#6C63FF" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="20" />
+                <Setter Property="Padding" Value="20, 10" />
+                <Setter Property="Shadow">
+                    <Shadow Brush="#6C63FF" Opacity="0.5" Offset="0,3" Radius="6" />
+                </Setter>
+            </Style>
+
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#F0EFFF" />
+                <Setter Property="TextColor" Value="#6C63FF" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="CornerRadius" Value="15" />
+                <Setter Property="Padding" Value="15,5" />
+            </Style>
+
+            <Style x:Key="CardStyle" TargetType="Frame">
+                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="Padding" Value="15" />
+                <Setter Property="Margin" Value="10" />
+                <Setter Property="BorderColor" Value="Transparent" />
+                <Setter Property="BackgroundColor" Value="White" />
+                <Setter Property="Shadow">
+                    <Shadow Brush="#20000000" Opacity="0.2" Offset="0,4" Radius="12" />
+                </Setter>
+            </Style>
+
+            <Style x:Key="HeaderLabelStyle" TargetType="Label">
+                <Setter Property="FontFamily" Value="OpenSansRegular" />
+                <Setter Property="FontSize" Value="26" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light=#212529, Dark=#F8F9FA}" />
+            </Style>
+
+            <Style x:Key="MenuItemStyle" TargetType="Grid">
+                <Setter Property="Padding" Value="12" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup Name="CommonStates">
+                            <VisualState Name="Normal" />
+                            <VisualState Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="#F0EFFF" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Logout" 
-                     Order="Primary" 
-                     Priority="0" 
-                     Clicked="OnLogoutClicked" />
-    </ContentPage.ToolbarItems>
+    <Grid RowDefinitions="Auto,Auto,*" Padding="15" RowSpacing="20">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="15">
+            <Image Grid.Column="0" Source="logo.png" HeightRequest="40" WidthRequest="40" />
+            <Label Grid.Column="1" Style="{StaticResource HeaderLabelStyle}" 
+                   Text="Alina's Fashion" 
+                   VerticalOptions="Center" />
+            <Label Grid.Column="1" Style="{StaticResource HeaderLabelStyle}" 
+                   Text="Premium Tailoring Workshop" 
+                   FontSize="14" 
+                   TextColor="{AppThemeBinding Light=#6C757D, Dark=#ADB5BD}"
+                   FontAttributes="Italic"
+                   VerticalOptions="End" />
 
-    <VerticalStackLayout Padding="20" Spacing="10">
-        <Label Text="Alina's Fashion - Premium Tailoring Workshop"
-               FontSize="24"
-               FontAttributes="Bold"
-               HorizontalOptions="Center" />
+            <Frame Grid.Column="2"
+                   HeightRequest="48" 
+                   WidthRequest="48"
+                   CornerRadius="24"
+                   Padding="0"
+                   HasShadow="True"
+                   BackgroundColor="{AppThemeBinding Light=#6C63FF, Dark=#6C63FF}"
+                   VerticalOptions="Start"
+                   HorizontalOptions="End">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMenuButtonClicked" />
+                </Frame.GestureRecognizers>
+                <Image Source="menu_icon.png" 
+                       HeightRequest="24" 
+                       WidthRequest="24"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Frame>
+        </Grid>
 
-        <Button Text="Create Order"
-                HorizontalOptions="Center" />
+        <Button Grid.Row="1" 
+                Text="Create New Order" 
+                Style="{StaticResource PrimaryButtonStyle}"
+                HorizontalOptions="Center"
+                WidthRequest="200" 
+                ImageSource="add_icon.png" />
 
-        <CarouselView ItemsSource="{Binding Orders}" HeightRequest="500">
+        <CarouselView Grid.Row="2" 
+                     ItemsSource="{Binding Orders}" 
+                     HorizontalScrollBarVisibility="Never"
+                     IndicatorView="indicatorView">
             <CarouselView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Padding="10" Margin="5" CornerRadius="10" BackgroundColor="White">
-                        <VerticalStackLayout>
-                            <Image Source="{Binding Image_Reference, Converter={StaticResource Base64ToImageConverter}}"
-                                   HeightRequest="150" WidthRequest="150"
-                                   Aspect="AspectFill" />
-
-                            <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" />
-
-                            <Label Text="{Binding Description}" MaxLines="2" LineBreakMode="TailTruncation" FontSize="14" />
-
-                            <Button Text="Read More" FontSize="12" Padding="5"
-                                    Command="{Binding ShowDescriptionCommand}"
-                                    CommandParameter="{Binding Description}" />
-
-                            <Label Text="{Binding Pickup_Time, Converter={StaticResource DateTimeConverter}, StringFormat='Pickup Time: {0}'}"
-                                   FontSize="14" />
-
-                            <Frame Padding="5" CornerRadius="10"
+                    <Frame Style="{StaticResource CardStyle}">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
+                            <Frame Grid.Row="0" HorizontalOptions="End" VerticalOptions="Start"
+                                   Padding="8,3" CornerRadius="15" HasShadow="False"
                                    BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
-                                <Label Text="{Binding Status}" TextColor="White" HorizontalOptions="Center" />
+                                <Label Text="{Binding Status}" TextColor="White" FontSize="12" FontAttributes="Bold" />
                             </Frame>
-                        </VerticalStackLayout>
+
+                            <Frame Grid.Row="1" HasShadow="False" IsClippedToBounds="True" 
+                                   CornerRadius="12" Padding="0" HorizontalOptions="Center">
+                                <Image Source="{Binding Image_Reference, Converter={StaticResource Base64ToImageConverter}}"
+                                       HeightRequest="180" WidthRequest="180"
+                                       Aspect="AspectFill" />
+                            </Frame>
+
+                            <Label Grid.Row="2" Text="{Binding Name}" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"
+                                   TextColor="{AppThemeBinding Light=#212529, Dark=#F8F9FA}" />
+
+                            <Label Grid.Row="3" Text="{Binding Description}" MaxLines="2" LineBreakMode="TailTruncation" 
+                                   FontSize="14" TextColor="{AppThemeBinding Light=#6C757D, Dark=#ADB5BD}" />
+
+                            <Label Grid.Row="4" Text="{Binding Pickup_Time, Converter={StaticResource DateTimeConverter}, StringFormat='Ready for pickup: {0}'}"
+                                   FontSize="14" TextColor="{AppThemeBinding Light=#495057, Dark=#CED4DA}" 
+                                   FontAttributes="Bold" />
+
+                            <Button Grid.Row="5" Text="View Details" Style="{StaticResource SecondaryButtonStyle}"
+                                    Command="{Binding ShowDescriptionCommand}"
+                                    CommandParameter="{Binding Description}" 
+                                    HorizontalOptions="Start" />
+                        </Grid>
                     </Frame>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
-    </VerticalStackLayout>
+        <IndicatorView x:Name="indicatorView"
+                       Grid.Row="2"
+                       VerticalOptions="End"
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,20"
+                       IndicatorColor="{AppThemeBinding Light=#DEE2E6, Dark=#495057}"
+                       SelectedIndicatorColor="{AppThemeBinding Light=#6C63FF, Dark=#6C63FF}" />
+        <Border x:Name="FlyoutMenu" 
+                Grid.RowSpan="3" 
+                IsVisible="false"
+                BackgroundColor="#80000000"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackgroundTapped" />
+            </Border.GestureRecognizers>
+
+            <Grid>
+                <Frame x:Name="MenuFrame"
+                       HeightRequest="200"
+                       WidthRequest="220"
+                       CornerRadius="16"
+                       BackgroundColor="White"
+                       Padding="0"
+                       Margin="0,60,15,0"
+                       HorizontalOptions="End"
+                       VerticalOptions="Start"
+                       BorderColor="#DDDDDD"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="0">
+                        <Grid ColumnDefinitions="*,Auto" Padding="15" BackgroundColor="#F8F9FA">
+                            <Label Grid.Column="0"
+                                   Text="Menu" 
+                                   FontAttributes="Bold"
+                                   FontSize="18"
+                                   VerticalOptions="Center" />
+                            <Button Grid.Column="1"
+                                    Text="✕"
+                                    FontSize="18"
+                                    WidthRequest="32"
+                                    HeightRequest="32"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="16"
+                                    Padding="0"
+                                    HorizontalOptions="End"
+                                    Clicked="OnBackgroundTapped" />
+                        </Grid>
+
+                        <Grid Style="{StaticResource MenuItemStyle}" 
+                              ColumnDefinitions="Auto,*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnMapsClicked" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" 
+                                   Source="map_icon.png" 
+                                   HeightRequest="24" 
+                                   WidthRequest="24" 
+                                   Margin="0,0,12,0" />
+                            <Label Grid.Column="1" 
+                                   Text="Maps" 
+                                   FontSize="16" 
+                                   VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" 
+                                 BackgroundColor="#EEEEEE" 
+                                 HorizontalOptions="Fill" />
+
+                        <Grid Style="{StaticResource MenuItemStyle}" 
+                              ColumnDefinitions="Auto,*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnLogoutClicked" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" 
+                                   Source="logout_icon.png" 
+                                   HeightRequest="24" 
+                                   WidthRequest="24" 
+                                   Margin="0,0,12,0" />
+                            <Label Grid.Column="1" 
+                                   Text="Logout" 
+                                   FontSize="16" 
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+        </Border>
+    </Grid>
 </ContentPage>
