@@ -5,10 +5,25 @@
              xmlns:vm="clr-namespace:TailoringCompany.ViewModels"
              x:Class="TailoringCompany.Pages.MapsPage"
              Title="MapsPage">
-
     <Shell.BackButtonBehavior>
         <BackButtonBehavior Command="{Binding BackCommand}" />
     </Shell.BackButtonBehavior>
 
-    <mapsui:MapControl x:Name="mapControl" />
+    <Grid RowDefinitions="Auto, *"
+          ColumnDefinitions="*"
+          RowSpacing="10"
+          ColumnSpacing="10"
+          Padding="10">
+        <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="10">
+            <Button Text="Add Pin" Command="{Binding AddPinCommand}" />
+            <Button Text="Delete First Pin" Command="{Binding DeletePinCommand}" CommandParameter="{Binding Pins[0]}" />
+            <Button Text="Edit First Pin" Command="{Binding EditPinCommand}" CommandParameter="{Binding Pins[0]}" />
+        </HorizontalStackLayout>
+
+        <Grid Grid.Row="1" Grid.Column="0">
+            <mapsui:MapControl x:Name="mapControl" />
+            <BoxView Color="Red" WidthRequest="20" HeightRequest="2" HorizontalOptions="Center" VerticalOptions="Center" />
+            <BoxView Color="Red" WidthRequest="2" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" />
+        </Grid>
+    </Grid>
 </ContentPage>
