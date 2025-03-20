@@ -1,8 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using TailoringCompany.Services;
+
 namespace TailoringCompany.ViewModels
 {
     public partial class MapsPageViewModel : ObservableObject
@@ -10,7 +15,12 @@ namespace TailoringCompany.ViewModels
         private readonly INavigationService _navigationService;
         public ICommand BackCommand { get; }
 
-        public ICommand AddPinCommand { get; set; }
+        private ICommand _addPinCommand;
+        public ICommand AddPinCommand
+        {
+            get => _addPinCommand;
+            set => SetProperty(ref _addPinCommand, value);
+        }
 
         [ObservableProperty]
         private ObservableCollection<PinData> _pins = new ObservableCollection<PinData>();
@@ -18,61 +28,116 @@ namespace TailoringCompany.ViewModels
         public MapsPageViewModel(INavigationService navigationService)
         {
             _navigationService = navigationService;
-            BackCommand = new Command(async () => await NavigateBack());
-            AddPinCommand = new Command(AddPin);
+            BackCommand = new Command(async () => await NavigateBackAsync());
+
+            AddPinCommand = new Command(AddDefaultPin);
         }
 
-        public void AddPin()
+
+        public void SetAddPinAction(Action<PinData> addPinAction)
+        {
+            AddPinCommand = new Command(() => addPinAction(new PinData()));
+        }
+        private void AddDefaultPin()
         {
             var newPin = new PinData
             {
                 Latitude = 40.7128,
                 Longitude = -74.0060,
-                Label = $"Pin at {DateTime.Now:T}"
+                Label = $"Default pin at {DateTime.Now:T}"
             };
+
             Pins.Add(newPin);
-            Console.WriteLine($"AddPin executed. Pin count: {Pins.Count}");
+            Debug.WriteLine($"Default pin added. Pin count: {Pins.Count}");
+        }
+
+        [RelayCommand]
+        public void DeleteLastPin()
+        {
+            if (Pins.Any())
+            {
+                var pin = Pins.Last();
+                Pins.Remove(pin);
+                Debug.WriteLine($"DeleteLastPin executed. Removed: {pin.Label}. Pin count: {Pins.Count}");
+            }
+            else
+            {
+                Debug.WriteLine("DeleteLastPin: No pins to delete.");
+            }
         }
 
         [RelayCommand]
         public void DeletePin(PinData pin)
         {
-            if (pin == null && Pins.Any())
+            try
             {
-                pin = Pins[0];
+                if (pin != null && Pins.Contains(pin))
+                {
+                    Pins.Remove(pin);
+                    Debug.WriteLine($"DeletePin executed. Removed: {pin.Label}. Pin count: {Pins.Count}");
+                }
+                else
+                {
+                    Debug.WriteLine("DeletePin: No pin specified or pin not found.");
+                }
             }
-            if (pin != null && Pins.Contains(pin))
+            catch (Exception ex)
             {
-                Pins.Remove(pin);
-                Console.WriteLine($"DeletePin executed. Removed: {pin.Label}. Pin count: {Pins.Count}");
+                Debug.WriteLine($"Error in DeletePin: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        public void EditLastPin()
+        {
+            if (Pins.Any())
+            {
+                var pin = Pins.Last();
+                pin.Label = $"Edited at {DateTime.Now:T}";
+                Debug.WriteLine($"EditLastPin executed. New label: {pin.Label}");
+
+                OnPropertyChanged(nameof(Pins));
             }
             else
             {
-                Console.WriteLine("DeletePin: No pins to delete.");
+                Debug.WriteLine("EditLastPin: No pins to edit.");
             }
         }
 
         [RelayCommand]
         public void EditPin(PinData pin)
         {
-            if (pin == null && Pins.Any())
+            try
             {
-                pin = Pins[0];
+                if (pin != null && Pins.Contains(pin))
+                {
+                    pin.Label = $"Edited at {DateTime.Now:T}";
+                    Debug.WriteLine($"EditPin executed. New label: {pin.Label}");
+
+                    OnPropertyChanged(nameof(Pins));
+                }
+                else
+                {
+                    Debug.WriteLine("EditPin: No pin specified or pin not found.");
+                }
             }
-            if (pin != null && Pins.Contains(pin))
+            catch (Exception ex)
             {
-                pin.Label = $"Edited at {DateTime.Now:T}";
-                Console.WriteLine($"EditPin executed. New label: {pin.Label}");
-            }
-            else
-            {
-                Console.WriteLine("EditPin: No pins to edit.");
+                Debug.WriteLine($"Error in EditPin: {ex.Message}");
             }
         }
 
-        private async Task NavigateBack()
+
+        private async Task NavigateBackAsync()
         {
-            await _navigationService.NavigateToAsync("/LandingPage");
+            try
+            {
+                await _navigationService.NavigateToAsync("/LandingPage");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Navigation error: {ex.Message}");
+            }
         }
     }
 
@@ -80,9 +145,19 @@ namespace TailoringCompany.ViewModels
     {
         [ObservableProperty]
         private double _latitude;
+
         [ObservableProperty]
         private double _longitude;
+
         [ObservableProperty]
         private string _label;
+
+        [ObservableProperty]
+        private DateTime _createdAt = DateTime.Now;
+
+        public override string ToString()
+        {
+            return $"{Label} ({Latitude:F4}, {Longitude:F4})";
+        }
     }
 }

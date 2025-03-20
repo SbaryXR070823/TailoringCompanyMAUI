@@ -6,6 +6,9 @@ using Mapsui.Tiling;
 using Mapsui.UI.Maui;
 using TailoringCompany.ViewModels;
 using Map = Mapsui.Map;
+using Microsoft.Maui.Controls;
+using System;
+using System.Diagnostics;
 
 namespace TailoringCompany.Pages;
 
@@ -13,91 +16,130 @@ public partial class MapsPage : ContentPage
 {
     private readonly MapsPageViewModel _viewModel;
     private WritableLayer _pinLayer;
+    private bool _isInitialized = false;
 
     public MapsPage(MapsPageViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
-
-        var map = new Map();
-        map.Layers.Add(OpenStreetMap.CreateTileLayer());
-
-        _pinLayer = new WritableLayer { Name = "Pins" };
-        map.Layers.Add(_pinLayer);
-
-        mapControl.Map = map;
-        mapControl.Map.Navigator.CenterOn(new MPoint(0, 0));
-        mapControl.Map.Navigator.ZoomTo(10000);
-
-        var tapGesture = new TapGestureRecognizer();
-        tapGesture.Tapped += MapControl_Tapped;
-        mapControl.GestureRecognizers.Add(tapGesture);
-
-        _viewModel.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(_viewModel.Pins))
-            {
-                UpdatePins();
-            }
-        };
-        _viewModel.Pins.CollectionChanged += (s, e) => UpdatePins();
-        UpdatePins(); 
+        _viewModel.SetAddPinAction(AddPinAtCrosshair);
     }
 
-    private void MapControl_Tapped(object sender, EventArgs e)
+    protected override void OnAppearing()
     {
-        if (sender is MapControl mapControl)
+        base.OnAppearing();
+
+        if (!_isInitialized)
         {
-            var tapEventArgs = e as TappedEventArgs;
-            if (tapEventArgs != null)
-            {
-                var screenPosition = tapEventArgs.GetPosition(mapControl);
-                if (screenPosition.HasValue)
-                {
-                    var mapInfo = mapControl.GetMapInfo(
-                        new Mapsui.Manipulations.ScreenPosition(screenPosition.Value.X, screenPosition.Value.Y),
-                        mapControl.Map.Layers
-                    );
-                    if (mapInfo?.WorldPosition != null)
-                    {
-                        (double longitude, double latitude) = SphericalMercator.ToLonLat(mapInfo.WorldPosition.X, mapInfo.WorldPosition.Y);
-                        _viewModel.Pins.Add(new PinData
-                        {
-                            Latitude = latitude,
-                            Longitude = longitude,
-                            Label = $"Tapped at {latitude:F2}, {longitude:F2}"
-                        });
-                    }
-                }
-            }
+            InitializeMap();
+            _isInitialized = true;
         }
     }
+
+    private void InitializeMap()
+    {
+        try
+        {
+            var map = new Map();
+
+            map.Layers.Add(OpenStreetMap.CreateTileLayer());
+
+            _pinLayer = new WritableLayer { Name = "Pins" };
+            map.Layers.Add(_pinLayer);
+
+            mapControl.Map = map;
+
+            mapControl.Map.Navigator.CenterOn(new MPoint(0, 0));
+            mapControl.Map.Navigator.ZoomTo(10000);
+
+            _viewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(_viewModel.Pins))
+                {
+                    UpdatePins();
+                }
+            };
+
+            _viewModel.Pins.CollectionChanged += (s, e) => UpdatePins();
+
+            UpdatePins();
+
+            Debug.WriteLine("Map initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error initializing map: {ex.Message}");
+            DisplayAlert("Map Error", $"Failed to initialize map: {ex.Message}", "OK");
+        }
+    }
+
+    private void AddPinAtCrosshair(PinData pin)
+    {
+        try
+        {
+            if (mapControl?.Map?.Navigator == null)
+            {
+                Debug.WriteLine("Map not fully initialized");
+                return;
+            }
+
+            (double longitude, double latitude) = SphericalMercator.ToLonLat(mapControl.Map.Navigator.Viewport.CenterX, mapControl.Map.Navigator.Viewport.CenterY);
+
+            pin.Latitude = latitude;
+            pin.Longitude = longitude;
+            pin.Label = $"Pin at {latitude:F4}, {longitude:F4}";
+
+            _viewModel.Pins.Add(pin);
+
+            Debug.WriteLine($"Added pin at crosshair: {latitude:F4}, {longitude:F4}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error adding pin: {ex.Message}");
+        }
+    }
+
     private void UpdatePins()
     {
-        _pinLayer.Clear();
-        Console.WriteLine($"UpdatePins called. Pin count: {_viewModel.Pins.Count}");
-        foreach (var pin in _viewModel.Pins)
+        try
         {
-            var point = SphericalMercator.FromLonLat(pin.Longitude, pin.Latitude);
-            var feature = new PointFeature(point)
+            if (_pinLayer == null || mapControl?.Map == null)
             {
-                Styles = new[] { CreatePinStyle() }
-            };
-            feature["Label"] = pin.Label;
-            _pinLayer.Add(feature);
-            Console.WriteLine($"Added to layer: {pin.Label}");
+                Debug.WriteLine("Cannot update pins: Map or pin layer not initialized");
+                return;
+            }
+
+            _pinLayer.Clear();
+            Debug.WriteLine($"UpdatePins called. Pin count: {_viewModel.Pins.Count}");
+
+            foreach (var pin in _viewModel.Pins)
+            {
+                var point = SphericalMercator.FromLonLat(pin.Longitude, pin.Latitude);
+                var feature = new PointFeature(point)
+                {
+                    Styles = new[] { CreatePinStyle() }
+                };
+                feature["Label"] = pin.Label;
+                _pinLayer.Add(feature);
+                Debug.WriteLine($"Added to layer: {pin.Label}");
+            }
+
+            _pinLayer.DataHasChanged();
+            mapControl.Refresh(); 
+            Debug.WriteLine("Layer updated and map refreshed.");
         }
-        _pinLayer.DataHasChanged();
-        mapControl.Refresh(); // Force map redraw
-        Console.WriteLine("Layer updated and map refreshed.");
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error updating pins: {ex.Message}");
+        }
     }
 
     private IStyle CreatePinStyle()
     {
         return new SymbolStyle
         {
-            SymbolScale = 0.5,
+            SymbolScale = 0.7,
             SymbolType = SymbolType.Ellipse,
             Fill = new Mapsui.Styles.Brush { Color = Mapsui.Styles.Color.Red },
             Outline = new Mapsui.Styles.Pen { Color = Mapsui.Styles.Color.Black, Width = 2 }

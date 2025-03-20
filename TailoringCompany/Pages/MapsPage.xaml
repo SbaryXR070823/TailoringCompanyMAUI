@@ -4,26 +4,52 @@
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              xmlns:vm="clr-namespace:TailoringCompany.ViewModels"
              x:Class="TailoringCompany.Pages.MapsPage"
-             Title="MapsPage">
+             Title="Map">
     <Shell.BackButtonBehavior>
         <BackButtonBehavior Command="{Binding BackCommand}" />
     </Shell.BackButtonBehavior>
-
-    <Grid RowDefinitions="Auto, *"
+    <Grid RowDefinitions="Auto, Auto, *"
           ColumnDefinitions="*"
           RowSpacing="10"
           ColumnSpacing="10"
           Padding="10">
-        <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="10">
-            <Button Text="Add Pin" Command="{Binding AddPinCommand}" />
-            <Button Text="Delete First Pin" Command="{Binding DeletePinCommand}" CommandParameter="{Binding Pins[0]}" />
-            <Button Text="Edit First Pin" Command="{Binding EditPinCommand}" CommandParameter="{Binding Pins[0]}" />
-        </HorizontalStackLayout>
-
-        <Grid Grid.Row="1" Grid.Column="0">
+        <!-- Page Title -->
+        <Label Grid.Row="0" Grid.Column="0" 
+               Text="Map Location" 
+               FontSize="24" 
+               FontAttributes="Bold" 
+               HorizontalOptions="Start" />
+        <!-- Buttons -->
+        <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="*, *, *" ColumnSpacing="10">
+            <Button Grid.Column="0" Text="Add Pin" 
+                    Command="{Binding AddPinCommand}" 
+                    BackgroundColor="#3498db" 
+                    TextColor="White"
+                    CornerRadius="5" />
+            <Button Grid.Column="1" Text="Delete Last Pin" 
+                    Command="{Binding DeleteLastPinCommand}" 
+                    BackgroundColor="#e74c3c" 
+                    TextColor="White"
+                    CornerRadius="5" />
+            <Button Grid.Column="2" Text="Edit Last Pin" 
+                    Command="{Binding EditLastPinCommand}" 
+                    BackgroundColor="#2ecc71" 
+                    TextColor="White"
+                    CornerRadius="5" />
+        </Grid>
+        <!-- Map and Crosshair -->
+        <Grid Grid.Row="2" Grid.Column="0">
             <mapsui:MapControl x:Name="mapControl" />
-            <BoxView Color="Red" WidthRequest="20" HeightRequest="2" HorizontalOptions="Center" VerticalOptions="Center" />
-            <BoxView Color="Red" WidthRequest="2" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" />
+            <!-- Crosshair -->
+            <Grid HorizontalOptions="Center" VerticalOptions="Center">
+                <BoxView Color="Red" WidthRequest="20" HeightRequest="2" HorizontalOptions="Center" VerticalOptions="Center" />
+                <BoxView Color="Red" WidthRequest="2" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                <Frame BackgroundColor="#22FFFFFF" BorderColor="Red" CornerRadius="10"
+                       Padding="5" HorizontalOptions="Center" VerticalOptions="Center"
+                       TranslationY="30">
+                    <Label Text="Center Pin Position" FontSize="12" TextColor="Red" />
+                </Frame>
+            </Grid>
         </Grid>
     </Grid>
 </ContentPage>
