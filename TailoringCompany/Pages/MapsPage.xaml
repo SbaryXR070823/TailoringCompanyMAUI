@@ -33,12 +33,6 @@
                     BackgroundColor="#3498db" 
                     TextColor="White"
                     CornerRadius="5" />
-            <Button Grid.Column="1" Text="Delete Pin" 
-                    Command="{Binding DeleteCurrentPinCommand}" 
-                    IsEnabled="{Binding IsEditingPin}"
-                    BackgroundColor="#e74c3c" 
-                    TextColor="White"
-                    CornerRadius="5" />
             <Label Grid.Column="2" 
                    Text="{Binding CurrentLatitude, StringFormat='Lat: {0:F4}'}" 
                    VerticalOptions="Center"
@@ -59,6 +53,21 @@
                 </Frame>
             </Grid>
 
+            <Button x:Name="locationButton"
+                    BackgroundColor="#3498db"
+                    TextColor="White"
+                    Text="📍" 
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    Padding="0"
+                    CornerRadius="25"
+                    HorizontalOptions="End"
+                    VerticalOptions="End"
+                    Margin="0,0,20,80"
+                    Clicked="LocationButton_Clicked"/>
+            
             <Frame IsVisible="{Binding ShowPinOverlay}"
                    BackgroundColor="White"
                    BorderColor="#3498db"

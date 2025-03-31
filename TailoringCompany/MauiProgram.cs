@@ -24,7 +24,11 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-            });
+            })
+            .ConfigureMauiHandlers(handlers => 
+            {
+            }); 
+
         // Load Firebase settings from embedded resources
         var assembly = typeof(App).Assembly;
         using var stream = assembly.GetManifestResourceStream("TailoringCompany.firebase-config.json");

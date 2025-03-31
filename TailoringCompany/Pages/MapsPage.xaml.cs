@@ -68,18 +68,21 @@ public partial class MapsPage : ContentPage
             map.Layers.Add(_pinLayer);
 
             mapControl.Map = map;
+            
             map.Home = n =>
             {
                 n.CenterOn(new Mapsui.MPoint(0, 0));
-                n.ZoomTo(5);
+                n.ZoomTo(3);
             };
             map.Navigator.CenterOn(new Mapsui.MPoint(0, 0));
-            map.Navigator.ZoomTo(5);
+            map.Navigator.ZoomTo(3);
 
             mapControl.Info -= MapControl_Info; 
             mapControl.Info += MapControl_Info;
 
             mapControl.Map.Navigator.ViewportChanged += MapControl_ViewportChanged;
+            
+            GetCurrentLocationAsync();
         }
         catch (Exception ex)
         {
@@ -246,6 +249,53 @@ public partial class MapsPage : ContentPage
         {
             Debug.WriteLine($"Error updating pins: {ex}");
         }
+    }
+
+    private async Task GetCurrentLocationAsync()
+    {
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                if (status != PermissionStatus.Granted)
+                {
+                    Debug.WriteLine("Location permission not granted");
+                    return;
+                }
+            }
+
+            var location = await Geolocation.GetLocationAsync(new GeolocationRequest
+            {
+                DesiredAccuracy = GeolocationAccuracy.Best,
+                Timeout = TimeSpan.FromSeconds(30)
+            });
+
+            if (location != null)
+            {
+                Debug.WriteLine($"Current location: {location.Latitude}, {location.Longitude}");
+                var sphericalMercator = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
+                mapControl.Map.Navigator.CenterOn(new MPoint(sphericalMercator.x, sphericalMercator.y));
+                
+                _viewModel.CurrentLatitude = location.Latitude;
+                _viewModel.CurrentLongitude = location.Longitude;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error getting current location: {ex}");
+        }
+    }
+    
+    private async Task CenterMapOnCurrentLocationAsync()
+    {
+        await GetCurrentLocationAsync();
+    }
+
+    private async void LocationButton_Clicked(object sender, EventArgs e)
+    {
+        await CenterMapOnCurrentLocationAsync();
     }
 }
 
