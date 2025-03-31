@@ -5,6 +5,8 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Options;
 using Shared.Models;
 using System;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Authentication.Services;
@@ -46,6 +48,28 @@ public class FirebaseAuthService : IAuthService
         try
         {
             var userRecord = await _auth.GetUserByEmailAsync(email);
+            
+            var signInUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={_settings.ApiKey}";
+            
+            using var client = new HttpClient();
+            var content = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    email,
+                    password,
+                    returnSecureToken = true
+                }),
+                Encoding.UTF8,
+                "application/json");
+                
+            var response = await client.PostAsync(signInUrl, content);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Password verification failed: {errorContent}");
+            }
+
             var userInfo = new UserInfo
             {
                 Email = userRecord.Email,
@@ -58,6 +82,10 @@ public class FirebaseAuthService : IAuthService
             return userInfo;
         }
         catch (FirebaseAuthException ex)
+        {
+            throw new Exception("Authentication failed", ex);
+        }
+        catch (Exception ex)
         {
             throw new Exception("Authentication failed", ex);
         }
