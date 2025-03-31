@@ -114,6 +114,15 @@ namespace TailoringCompany.ViewModels
             {
                 Pins.Add(SelectedPin);
             }
+            else
+            {
+                int index = Pins.IndexOf(SelectedPin);
+                if (index >= 0)
+                {
+                    Pins.Remove(SelectedPin);
+                    Pins.Add(SelectedPin);
+                }
+            }
             IsAddingPin = false;
             IsEditingPin = false;
             ShowPinOverlay = false;
