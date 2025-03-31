@@ -64,11 +64,10 @@ public partial class MapsPage : ContentPage
 
             map.Layers.Add(OpenStreetMap.CreateTileLayer());
 
-            _pinLayer = new MemoryLayer { Name = "PinLayer" };
+            _pinLayer = new MemoryLayer { Name = "PinLayer", IsMapInfoLayer = true };
             map.Layers.Add(_pinLayer);
 
             mapControl.Map = map;
-
             map.Home = n =>
             {
                 n.CenterOn(new Mapsui.MPoint(0, 0));
@@ -77,6 +76,7 @@ public partial class MapsPage : ContentPage
             map.Navigator.CenterOn(new Mapsui.MPoint(0, 0));
             map.Navigator.ZoomTo(5);
 
+            mapControl.Info -= MapControl_Info; 
             mapControl.Info += MapControl_Info;
 
             mapControl.Map.Navigator.ViewportChanged += MapControl_ViewportChanged;
@@ -113,20 +113,40 @@ public partial class MapsPage : ContentPage
     {
         try
         {
+            Debug.WriteLine($"MapControl_Info triggered: {e.MapInfo?.Feature != null}");
+            
             if (e.MapInfo?.Feature == null) return;
 
             if (e.MapInfo.Feature is PointFeature pointFeature)
             {
-                if (e.MapInfo.Feature["PinId"] is string pinId)
+                Debug.WriteLine($"Feature is a point feature");
+                
+                if (e.MapInfo.Feature["PinId"] != null)
                 {
+                    var pinId = e.MapInfo.Feature["PinId"].ToString();
+                    Debug.WriteLine($"Found PinId: {pinId}");
+                    
                     var pin = _viewModel.Pins.FirstOrDefault(p => p.Id == pinId);
                     if (pin != null)
                     {
+                        Debug.WriteLine($"Pin found and selected: {pin.Name ?? pin.Label}");
                         MainThread.BeginInvokeOnMainThread(() => {
                             _viewModel.SelectPin(pin);
                         });
                     }
+                    else
+                    {
+                        Debug.WriteLine($"Pin with id {pinId} not found in collection");
+                    }
                 }
+                else
+                {
+                    Debug.WriteLine("Feature does not contain a valid PinId");
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"Feature is not a point feature: {e.MapInfo.Feature.GetType().Name}");
             }
         }
         catch (Exception ex)
@@ -184,10 +204,13 @@ public partial class MapsPage : ContentPage
 
                     var symbolStyle = new SymbolStyle
                     {
-                        SymbolScale = 0.8,
+                        SymbolScale = 1.0,
                         Fill = new Mapsui.Styles.Brush(Color.Red),
-                        Outline = new Pen(Color.Black, 2)
+                        Outline = new Pen(Color.Black, 2),
+                        SymbolType = SymbolType.Ellipse,
+                        Enabled = true
                     };
+                    
                     var labelStyle = new LabelStyle
                     {
                         Text = string.IsNullOrEmpty(pin.Name) ? pin.Label : pin.Name,
@@ -196,8 +219,16 @@ public partial class MapsPage : ContentPage
                         ForeColor = Color.Black,
                         HorizontalAlignment = LabelStyle.HorizontalAlignmentEnum.Center
                     };
+                    
+                    var highlightStyle = new SymbolStyle
+                    {
+                        SymbolScale = 1.5,
+                        Fill = new Mapsui.Styles.Brush(new Color(255, 0, 0, 100)),
+                        SymbolType = SymbolType.Ellipse,
+                        Enabled = true
+                    };
 
-                    feature.Styles = new List<IStyle> { symbolStyle, labelStyle };
+                    feature.Styles = new List<IStyle> { symbolStyle, labelStyle, highlightStyle };
 
                     features.Add(feature);
                 }

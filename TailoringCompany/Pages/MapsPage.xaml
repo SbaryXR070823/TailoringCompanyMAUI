@@ -48,12 +48,13 @@
         <Grid Grid.Row="2" Grid.Column="0">
             <mapsui:MapControl x:Name="mapControl" />
             
-            <Grid HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding IsAddingPin}">
+            <!-- Crosshair (always visible) -->
+            <Grid HorizontalOptions="Center" VerticalOptions="Center">
                 <BoxView Color="Red" WidthRequest="20" HeightRequest="2" HorizontalOptions="Center" VerticalOptions="Center" />
                 <BoxView Color="Red" WidthRequest="2" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" />
                 <Frame BackgroundColor="#22FFFFFF" BorderColor="Red" CornerRadius="10"
-           Padding="5" HorizontalOptions="Center" VerticalOptions="Center"
-           TranslationY="30">
+                       Padding="5" HorizontalOptions="Center" VerticalOptions="Center"
+                       TranslationY="30" IsVisible="{Binding IsAddingPin}">
                     <Label Text="Center Pin Position" FontSize="12" TextColor="Red" />
                 </Frame>
             </Grid>
