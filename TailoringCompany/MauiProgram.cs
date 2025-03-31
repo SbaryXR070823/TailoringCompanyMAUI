@@ -58,6 +58,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IOrdersService, OrdersService>();
         builder.Services.AddSingleton<IProductsService, ProductsService>();
         builder.Services.AddSingleton<IUserService, UserService>();
+        builder.Services.AddSingleton<IPinStorageService, PinStorageService>();
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
